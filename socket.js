@@ -143,6 +143,6 @@ async function sendQuestion(io, roomCode) {
     }
 
     // next question automatically
-    sendQuestion(io, roomCode);
+    sendQuestion(io, roomCode); 
   }, 10000);
 }
