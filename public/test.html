@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz Socket Test</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h2>Live Quiz Test</h2>
+
+  <input id="name" placeholder="Name" />
+  <input id="roomCode" placeholder="Room Code" />
+  <button onclick="joinRoom()">Join Room</button>
+
+  <hr />
+
+  <button onclick="startQuiz()">Start Quiz (Host)</button>
+  <button onclick="nextQuestion()">Next Question</button>
+
+  <h3 id="question"></h3>
+  <div id="options"></div>
+
+  <h3>Leaderboard</h3>
+  <ul id="leaderboard"></ul>
+
+  <script>
+    const socket = io();
+    
+
+    function joinRoom() {
+      const name = document.getElementById("name").value;
+      const roomCode = document.getElementById("roomCode").value;
+
+      socket.emit("join-room", { name, roomCode });
+    }
+
+    function startQuiz() {
+      const roomCode = document.getElementById("roomCode").value;
+      socket.emit("start-quiz", { roomCode });
+    }
+
+    function nextQuestion() {
+      const roomCode = document.getElementById("roomCode").value;
+      socket.emit("next-question", { roomCode });
+    }
+
+    socket.on("player-list", (players) => {
+      console.log("Players:", players);
+    });
+
+    socket.on("quiz-ended-message", (data) => {
+  alert(data.message);
+});
+
+socket.on("join-blocked", (data) => {
+  alert(data.message);
+});
+
+    socket.on("new-question", (data) => {
+      document.getElementById("question").innerText = data.question;
+
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+
+      data.options.forEach((opt, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = opt;
+        btn.onclick = () => {
+          socket.emit("submit-answer", {
+            roomCode: document.getElementById("roomCode").value,
+            name: document.getElementById("name").value,
+            answerIndex: index
+          });
+        };
+        optionsDiv.appendChild(btn);
+      });
+    });
+
+    socket.on("leaderboard", (data) => {
+      const ul = document.getElementById("leaderboard");
+      ul.innerHTML = "";
+      data.forEach(p => {
+        const li = document.createElement("li");
+        li.innerText = `${p.name}: ${p.score}`;
+        ul.appendChild(li);
+      });
+    });
+
+    socket.on("quiz-ended", (finalBoard) => {
+      alert("Quiz Ended!");
+      console.log(finalBoard);
+    });
+  </script>
+</body>
+</html>
