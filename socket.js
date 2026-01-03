@@ -51,9 +51,7 @@ module.exports = (io) => {
       }
     });
 
-    // =========================
-    // START QUIZ (HOST)
-    // =========================
+    
     socket.on("start-quiz", async ({ roomCode }) => {
       const room = await Room.findOne({ roomCode });
       if (!room) return;
@@ -73,9 +71,6 @@ module.exports = (io) => {
       sendQuestion(io, roomCode);
     });
 
-    // =========================
-    // SUBMIT ANSWER (NO SCORING HERE)
-    // =========================
     socket.on("submit-answer", ({ roomCode, name, answerIndex }) => {
       if (!activeAnswers[roomCode]) return;
 
@@ -91,9 +86,6 @@ module.exports = (io) => {
   });
 };
 
-// =========================
-// SEND QUESTION + TIMER
-// =========================
 async function sendQuestion(io, roomCode) {
   const room = await Room.findOne({ roomCode });
   if (!room) return;
